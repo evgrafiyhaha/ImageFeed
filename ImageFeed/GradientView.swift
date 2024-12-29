@@ -1,9 +1,13 @@
 import Foundation
 import UIKit
 
-class GradientView: UIView {
+final class GradientView: UIView {
+
+    // MARK: - Private Properties
 
     private let gradientLayer = CAGradientLayer()
+
+    // MARK: - Initializers
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -14,10 +18,14 @@ class GradientView: UIView {
         setupGradient()
     }
 
+    // MARK: - Overrides Methods
+
     override func layoutSubviews() {
         super.layoutSubviews()
         gradientLayer.frame = bounds
     }
+
+    // MARK: - Private Methods
 
     private func setupGradient() {
         self.layer.addSublayer(gradientLayer)
