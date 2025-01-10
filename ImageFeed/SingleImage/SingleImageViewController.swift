@@ -1,4 +1,3 @@
-import Foundation
 import UIKit
 
 final class SingleImageViewController: UIViewController {
@@ -36,11 +35,11 @@ final class SingleImageViewController: UIViewController {
 
     // MARK: - IB Actions
 
-    @IBAction func didTapBackButton(_ sender: Any) {
+    @IBAction private func didTapBackButton(_ sender: Any) {
         dismiss(animated: true, completion: nil)
     }
 
-    @IBAction func didTapShareButton(_ sender: Any) {
+    @IBAction private func didTapShareButton(_ sender: Any) {
         guard let image else { return }
         present(UIActivityViewController(activityItems: [image], applicationActivities: nil), animated: true, completion: nil)
     }

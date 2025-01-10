@@ -1,4 +1,3 @@
-import Foundation
 import UIKit
 
 final class ProfileViewController: UIViewController {
@@ -79,7 +78,6 @@ final class ProfileViewController: UIViewController {
             userImage.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,constant: 32),
             userImage.widthAnchor.constraint(equalToConstant: 70),
             userImage.heightAnchor.constraint(equalToConstant: 70),
-            nameLabel.topAnchor.constraint(equalTo: userImage.bottomAnchor, constant: 8),
             nameLabel.topAnchor.constraint(equalTo: userImage.bottomAnchor, constant: 8),
             nameLabel.leadingAnchor.constraint(equalTo: userImage.leadingAnchor),
             loginNameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
