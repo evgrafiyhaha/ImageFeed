@@ -25,12 +25,23 @@ final class WebViewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         webView.navigationDelegate = self
-
+        //clearWebViewCache()
         loadAuthView()
         observeProgress()
     }
 
     // MARK: - Private Methods
+
+    private func clearWebViewCache() {
+        let dataStore = WKWebsiteDataStore.default()
+        let types = WKWebsiteDataStore.allWebsiteDataTypes()
+        dataStore.fetchDataRecords(ofTypes: types) { records in
+            dataStore.removeData(ofTypes: types, for: records) {
+                // Данные очищены
+            }
+        }
+    }
+
 
     private func observeProgress() {
         progressObservation = webView.observe(\.estimatedProgress, options: .new) { [weak self] _, change in

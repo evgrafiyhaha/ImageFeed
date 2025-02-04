@@ -1,8 +1,11 @@
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
 
     // MARK: - Private Properties
+
+    private var profileImageServiceObserver: NSObjectProtocol?
 
     private var logoutButton: UIButton?
     private var descriptionLabel: UILabel?
@@ -10,15 +13,29 @@ final class ProfileViewController: UIViewController {
     private var nameLabel: UILabel?
     private var loginNameLabel: UILabel?
 
+    private let profileService = ProfileService.shared
+    private let profileImageService = ProfileImageService.shared
+
     // MARK: - View Life Cycles
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.view.backgroundColor = .ypBlack
 
         initViews()
         addSubviews()
         setupConstraints()
-
+        updateProfileDetails()
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+            }
+        updateAvatar()
     }
 
     // MARK: - Private Methods
@@ -29,21 +46,18 @@ final class ProfileViewController: UIViewController {
 
     private func initViews() {
         let descriptionLabel = UILabel()
-        descriptionLabel.text = "Hello, World!"
         descriptionLabel.font = .systemFont(ofSize: 13)
         descriptionLabel.textColor = .white
 
         let loginNameLabel = UILabel()
-        loginNameLabel.text = "@ekaterina_now"
         loginNameLabel.font = .systemFont(ofSize: 13)
         loginNameLabel.textColor = .ypGray
 
         let nameLabel = UILabel()
-        nameLabel.text = "Екатерина Новикова"
         nameLabel.font = .systemFont(ofSize: 23)
         nameLabel.textColor = .white
 
-        let profileImage = UIImage(named: "profileMockPhoto")
+        let profileImage = UIImage(named: "Stub.jpeg")
         let userImage = UIImageView(image: profileImage)
         userImage.layer.cornerRadius = 35
 
@@ -106,4 +120,28 @@ final class ProfileViewController: UIViewController {
         view.addSubview(nameLabel)
         view.addSubview(loginNameLabel)
     }
+
+    private func updateProfileDetails() {
+        let profile = profileService.profile
+        guard let profile else { return }
+
+        self.descriptionLabel?.text = profile.bio
+        self.nameLabel?.text = profile.name
+        self.loginNameLabel?.text = profile.loginName
+
+    }
+
+    private func updateAvatar() {
+        guard
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
+
+        userImage?.kf.indicatorType = .activity
+        userImage?.kf.setImage(with: url,placeholder: UIImage(named: "Stub.jpeg"))
+
+        userImage?.layer.cornerRadius = 35
+        userImage?.clipsToBounds = true
+    }
+
 }
