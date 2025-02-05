@@ -23,18 +23,24 @@ final class ProfileImageService {
     // MARK: - Public Methods
     
     func fetchProfileImageURL(username: String, _ completion: @escaping (Result<String, Error>) -> Void){
-        guard let token = tokenStorage.token else { return }
-        
+        guard let token = tokenStorage.token else {
+            print("[ProfileImageService.fetchProfileImageURL]: AuthError - отсутствует токен")
+            completion(.failure(AuthServiceError.invalidRequest))
+            return
+        }
+
         assert(Thread.isMainThread)
         if task != nil {
             if lastUsername != username {
                 task?.cancel()
             } else {
+                print("[ProfileImageService.fetchProfileImageURL]: AuthError - повторный запрос с тем же username (\(username))")
                 completion(.failure(AuthServiceError.invalidRequest))
                 return
             }
         } else {
             if lastUsername == username {
+                print("[ProfileImageService.fetchProfileImageURL]: AuthError - повторный запрос с тем же username (\(username))")
                 completion(.failure(AuthServiceError.invalidRequest))
                 return
             }
@@ -55,7 +61,7 @@ final class ProfileImageService {
                             object: self,
                             userInfo: ["URL": self.avatarURL])
                 case .failure(let error):
-                    print("Ошибка запроса: \(error.localizedDescription)")
+                    print("[ProfileImageService.fetchProfileImageURL]: NetworkError - \(error.localizedDescription), URL: \(request.url?.absoluteString ?? "Unknown URL")")
                     completion(.failure(error))
                 }
                 self.task = nil
@@ -71,7 +77,7 @@ final class ProfileImageService {
     private func makeImageRequest(token: String,username: String) -> URLRequest {
         let url: URL = {
             guard let url = URL(string: "https://api.unsplash.com/users/\(username)") else {
-                fatalError("Не удалось инициализировать URL для базового адреса API")
+                fatalError("[ProfileImageService.makeImageRequest]: URLGenerationError - Не удалось создать URL для username (\(username))")
             }
             return url
         }()

@@ -30,6 +30,7 @@ final class AuthViewController: UIViewController {
             guard
                 let viewController = segue.destination as? WebViewViewController
             else {
+                print("[AuthViewController.prepare]: SegueError - Некорректный destination для segue \(segue.identifier ?? "unknown")")
                 assertionFailure("Invalid segue destination")
                 return
             }
@@ -71,7 +72,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 vc.dismiss(animated: true)
             case .failure(let error):
                 showAlert(title: "Что-то пошло не так", message: "Не удалось войти в систему")
-                print("Ошибка при получении токена: \(error.localizedDescription)")
+                print("[AuthViewController.webViewViewController]: OAuthError - Ошибка при получении токена: \(error.localizedDescription)")
             }
         }
     }

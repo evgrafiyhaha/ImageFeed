@@ -42,7 +42,7 @@
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
-                                    <segue destination="1KN-4B-nqp" kind="show" id="xLf-Wm-Ke9"/>
+                                    <segue destination="1KN-4B-nqp" kind="show" identifier="ShowWebView" id="xLf-Wm-Ke9"/>
                                 </connections>
                             </button>
                         </subviews>

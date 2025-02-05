@@ -48,14 +48,15 @@ class SplashViewController: UIViewController {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
 
         guard let authViewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else {
-            print("Ошибка: Не удалось загрузить AuthViewController из Storyboard")
+            print("[SplashViewController.switchToAuthenticationScreen]: UIError - Не удалось загрузить AuthViewController из Storyboard")
             return
         }
 
-        authViewController.delegate = self
-
         let navController = UINavigationController(rootViewController: authViewController)
         navController.modalPresentationStyle = .fullScreen
+
+        authViewController.delegate = self
+        authViewController.modalPresentationStyle = .fullScreen
 
         self.present(navController, animated: true)
     }
@@ -86,8 +87,9 @@ class SplashViewController: UIViewController {
             case .success(let profile):
                 ProfileImageService.shared.fetchProfileImageURL(username: profile.username) { _ in }
                 self.switchToTabBarController()
-            case .failure:
-                showAlert(title: "Что-то пошло не так", message: "Не удалось войти получить профиль")
+            case .failure(let error):
+                print("[SplashViewController.fetchProfile]: NetworkError - Ошибка загрузки профиля: \(error.localizedDescription)")
+                showAlert(title: "Что-то пошло не так", message: "Не удалось получить профиль")
                 break
             }
         }
@@ -97,12 +99,6 @@ class SplashViewController: UIViewController {
 extension SplashViewController: AuthViewControllerDelegate {
     func didAuthenticate(_ vc: AuthViewController) {
         vc.dismiss(animated: true)
-
-        guard let token = tokenStorage.token else {
-            return
-        }
-
-        fetchProfile(token)
     }
 }
 

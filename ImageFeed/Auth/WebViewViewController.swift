@@ -25,23 +25,11 @@ final class WebViewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         webView.navigationDelegate = self
-        //clearWebViewCache()
         loadAuthView()
         observeProgress()
     }
 
     // MARK: - Private Methods
-
-    private func clearWebViewCache() {
-        let dataStore = WKWebsiteDataStore.default()
-        let types = WKWebsiteDataStore.allWebsiteDataTypes()
-        dataStore.fetchDataRecords(ofTypes: types) { records in
-            dataStore.removeData(ofTypes: types, for: records) {
-                // Данные очищены
-            }
-        }
-    }
-
 
     private func observeProgress() {
         progressObservation = webView.observe(\.estimatedProgress, options: .new) { [weak self] _, change in
@@ -56,7 +44,7 @@ final class WebViewViewController: UIViewController {
 
     private func loadAuthView() {
         guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else {
-            print("Ошибка: Некорректный URL")
+            print("[WebViewViewController.loadAuthView]: URLFormationError - Некорректный URL")
             return
         }
 
@@ -68,7 +56,7 @@ final class WebViewViewController: UIViewController {
         ]
 
         guard let url = urlComponents.url else {
-            print("Ошибка: Не удалось сформировать URL из компонентов: \(urlComponents)")
+            print("[WebViewViewController.loadAuthView]: URLFormationError - Не удалось сформировать URL из компонентов: \(urlComponents)")
             return
         }
 

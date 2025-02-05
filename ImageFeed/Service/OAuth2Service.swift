@@ -31,11 +31,13 @@ final class OAuth2Service {
             if lastCode != code {
                 task?.cancel()
             } else {
+                print("[OAuth2Service.fetchOAuthToken]: AuthServiceError - Повторный запрос с тем же кодом")
                 completion(.failure(AuthServiceError.invalidRequest))
                 return
             }
         } else {
             if lastCode == code {
+                print("[OAuth2Service.fetchOAuthToken]: AuthServiceError - Повторный запрос с тем же кодом")
                 completion(.failure(AuthServiceError.invalidRequest))
                 return
             }
@@ -51,7 +53,7 @@ final class OAuth2Service {
                     
                     completion(.success(data.accessToken))
                 case .failure(let error):
-                    print("Ошибка запроса: \(error.localizedDescription)")
+                    print("[OAuth2Service.fetchOAuthToken]: NetworkError - Ошибка запроса: \(error.localizedDescription)")
                     completion(.failure(error))
                 }
                 self?.task = nil
@@ -67,14 +69,14 @@ final class OAuth2Service {
     private func makeOAuthTokenRequest(code: String) -> URLRequest {
         let baseURL: URL = {
             guard let url = URL(string: "https://unsplash.com/oauth/token") else {
-                fatalError("Не удалось инициализировать URL для базового адреса API")
+                fatalError("[OAuth2Service.makeOAuthTokenRequest]: FatalError - Не удалось инициализировать URL")
             }
             return url
         }()
         
         var urlComponents: URLComponents = {
             guard let components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
-                fatalError("Ошибка инициализации URLComponents")
+                fatalError("[OAuth2Service.makeOAuthTokenRequest]: FatalError - Ошибка инициализации URLComponents")
             }
             return components
         }()
@@ -88,7 +90,7 @@ final class OAuth2Service {
         ]
         
         guard let url = urlComponents.url else {
-            print("Ошибка: Не удалось сформировать URL из компонентов: \(urlComponents)")
+            print("[OAuth2Service.makeOAuthTokenRequest]: URLFormationError - Не удалось сформировать URL из компонентов: \(urlComponents)")
             return URLRequest(url: baseURL)
         }
         
