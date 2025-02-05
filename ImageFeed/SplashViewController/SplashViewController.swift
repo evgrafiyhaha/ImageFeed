@@ -1,6 +1,6 @@
 import UIKit
 
-class SplashViewController: UIViewController {
+final class SplashViewController: UIViewController {
 
     // MARK: - Private Properties
 
@@ -45,12 +45,7 @@ class SplashViewController: UIViewController {
     }
 
     private func switchToAuthenticationScreen() {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-
-        guard let authViewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else {
-            print("[SplashViewController.switchToAuthenticationScreen]: UIError - Не удалось загрузить AuthViewController из Storyboard")
-            return
-        }
+        let authViewController = AuthViewController()
 
         let navController = UINavigationController(rootViewController: authViewController)
         navController.modalPresentationStyle = .fullScreen
@@ -67,8 +62,7 @@ class SplashViewController: UIViewController {
             return
         }
 
-        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(withIdentifier: "TabBarViewController")
+        let tabBarController = TabBarController()
 
         window.rootViewController = tabBarController
     }

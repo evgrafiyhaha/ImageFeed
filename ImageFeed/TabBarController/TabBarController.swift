@@ -2,18 +2,34 @@ import UIKit
 
 final class TabBarController: UITabBarController {
 
-    // MARK: - Overrides Methods
+    // MARK: - View Life Cycles
     
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        let storyboard = UIStoryboard(name: "Main", bundle: .main)
-        let imagesListViewController = storyboard.instantiateViewController(withIdentifier: "ImagesListViewController")
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setUpTabBar()
+
+        let imagesListViewController = ImagesListViewController()
         let profileViewController = ProfileViewController()
         profileViewController.tabBarItem = UITabBarItem(
             title: "",
             image: UIImage(named: "tab_profile_active"),
             selectedImage: nil
         )
+        imagesListViewController.tabBarItem = UITabBarItem(
+            title: "",
+            image: UIImage(named: "tab_editorial_active"),
+            selectedImage: nil
+        )
+
         self.viewControllers = [imagesListViewController, profileViewController]
+    }
+
+    // MARK: - Private Methods
+
+    private func setUpTabBar() {
+        self.tabBar.tintColor = .white
+        self.tabBar.backgroundColor = .ypBlack
+        self.tabBar.barTintColor = .ypBlack
+        self.tabBar.isTranslucent = false
     }
 }
