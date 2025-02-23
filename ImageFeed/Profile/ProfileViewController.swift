@@ -25,6 +25,8 @@ final class ProfileViewController: UIViewController {
         initViews()
         addSubviews()
         setupConstraints()
+        userImage?.layer.cornerRadius = 35
+        userImage?.clipsToBounds = true
         updateProfileDetails()
         profileImageServiceObserver = NotificationCenter.default
             .addObserver(
@@ -139,9 +141,6 @@ final class ProfileViewController: UIViewController {
 
         userImage?.kf.indicatorType = .activity
         userImage?.kf.setImage(with: url,placeholder: UIImage(named: "Stub.jpeg"))
-
-        userImage?.layer.cornerRadius = 35
-        userImage?.clipsToBounds = true
     }
 
 }

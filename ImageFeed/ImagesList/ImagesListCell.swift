@@ -8,11 +8,11 @@ final class ImagesListCell: UITableViewCell {
     
     // MARK: - Public Properties
     
-    var cellImage: UIImageView?
-    var likeButton: UIButton?
-    var datelabel: UILabel?
-    var gradientView = GradientView()
-    
+    private var cellImage: UIImageView?
+    private var likeButton: UIButton?
+    private var datelabel: UILabel?
+    private var gradientView = GradientView()
+
     // MARK: - Initializers
     
     required init?(coder: NSCoder) {
@@ -96,7 +96,21 @@ final class ImagesListCell: UITableViewCell {
             gradientView.heightAnchor.constraint(equalToConstant: 30)
         ])
     }
-    
+
+    func configureCell(image : UIImage,currentDate: String,isLiked: Bool) {
+        guard
+            let cellImage,
+            let likeButton,
+            let datelabel
+        else { return }
+
+        cellImage.image = image
+        datelabel.text = currentDate
+
+        let likeImage = isLiked ? UIImage(named: "like_button_on")?.withRenderingMode(.alwaysOriginal) : UIImage(named: "like_button_off")?.withRenderingMode(.alwaysOriginal)
+        likeButton.setImage(likeImage, for: .normal)
+    }
+
     @objc private func didTapLikeButton(_ sender: Any) {
         // TODO: - Добавить логику при нажатии на кнопку
     }

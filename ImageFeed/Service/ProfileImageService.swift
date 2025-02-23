@@ -46,8 +46,11 @@ final class ProfileImageService {
             }
         }
         lastUsername = username
-        let request = makeImageRequest(token: token, username: username)
-        
+        guard let request = makeImageRequest(token: token, username: username) else {
+            print("[ProfileImageService.fetchProfileImageURL]: NetworkError - Ошибка запроса")
+            return
+        }
+
         let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<UserResult,Error>) in
             guard let self else { return }
             DispatchQueue.main.async {
@@ -74,14 +77,12 @@ final class ProfileImageService {
     
     // MARK: - Private Methods
     
-    private func makeImageRequest(token: String,username: String) -> URLRequest {
-        let url: URL = {
-            guard let url = URL(string: "https://api.unsplash.com/users/\(username)") else {
-                fatalError("[ProfileImageService.makeImageRequest]: URLGenerationError - Не удалось создать URL для username (\(username))")
-            }
-            return url
-        }()
-        
+    private func makeImageRequest(token: String,username: String) -> URLRequest? {
+        guard let url = URL(string: Constants.baseUsersUrlString + "/\(username)") else {
+            print("[ProfileImageService.makeImageRequest]: URLGenerationError - Не удалось создать URL для username (\(username))")
+            return nil
+        }
+
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         return request

@@ -50,20 +50,14 @@ final class ImagesListViewController: UIViewController {
 
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
         guard
-            let image = UIImage(named: photosName[indexPath.row]),
-            let cellImage = cell.cellImage,
-            let datelabel = cell.datelabel,
-            let likeButton = cell.likeButton
+            let image = UIImage(named: photosName[indexPath.row])
         else {
             return
         }
-        
-        cellImage.image = image
-        datelabel.text = dateFormatter.string(from: currentDate)
-
+        let currentDateString = dateFormatter.string(from: currentDate)
         let isLiked = indexPath.row % 2 == 0
-        let likeImage = isLiked ? UIImage(named: "like_button_on")?.withRenderingMode(.alwaysOriginal) : UIImage(named: "like_button_off")?.withRenderingMode(.alwaysOriginal)
-        likeButton.setImage(likeImage, for: .normal)
+
+        cell.configureCell(image: image,currentDate: currentDateString,isLiked: isLiked)
     }
 }
 

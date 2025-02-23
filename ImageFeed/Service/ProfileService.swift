@@ -45,7 +45,10 @@ final class ProfileService {
             }
         }
         lastToken = token
-        let request = makeprofileRequest(token: token)
+        guard let request = makeprofileRequest(token: token) else {
+            print("[ProfileService.fetchProfile]: NetworkError - Ошибка запроса")
+            return
+        }
 
         let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
             guard let self else { return }
@@ -71,13 +74,11 @@ final class ProfileService {
 
     // MARK: - Private Methods
 
-    private func makeprofileRequest(token: String) -> URLRequest {
-        let url: URL = {
-            guard let url = URL(string: "https://api.unsplash.com/me") else {
-                fatalError("[ProfileService.makeProfileRequest]: URLGenerationError - Не удалось создать URL")
-            }
-            return url
-        }()
+    private func makeprofileRequest(token: String) -> URLRequest? {
+        guard let url = URL(string: Constants.baseProfileUrlString) else {
+            print("[ProfileService.makeProfileRequest]: URLGenerationError - Не удалось создать URL")
+            return nil
+        }
 
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

@@ -6,7 +6,7 @@ final class WebViewViewController: UIViewController {
     // MARK: - Private Properties
 
     private var webView: WKWebView?
-    var progressView: UIProgressView?
+    private var progressView: UIProgressView?
 
     private var progressObservation: NSKeyValueObservation?
 

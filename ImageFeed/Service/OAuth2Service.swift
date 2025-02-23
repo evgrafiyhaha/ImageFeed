@@ -43,8 +43,11 @@ final class OAuth2Service {
             }
         }
         lastCode = code
-        let request = makeOAuthTokenRequest(code: code)
-        
+        guard let request = makeOAuthTokenRequest(code: code) else {
+            print("[OAuth2Service.fetchOAuthToken]: NetworkError - Ошибка запроса")
+            return
+        }
+
         let task = URLSession.shared.objectTask(for: request) {[weak self] (result: Result<OAuthTokenResponseBody,Error>) in
             DispatchQueue.main.async {
                 switch result {
@@ -66,20 +69,15 @@ final class OAuth2Service {
     
     // MARK: - Private Methods
     
-    private func makeOAuthTokenRequest(code: String) -> URLRequest {
-        let baseURL: URL = {
-            guard let url = URL(string: "https://unsplash.com/oauth/token") else {
-                fatalError("[OAuth2Service.makeOAuthTokenRequest]: FatalError - Не удалось инициализировать URL")
-            }
-            return url
-        }()
-        
-        var urlComponents: URLComponents = {
-            guard let components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
-                fatalError("[OAuth2Service.makeOAuthTokenRequest]: FatalError - Ошибка инициализации URLComponents")
-            }
-            return components
-        }()
+    private func makeOAuthTokenRequest(code: String) -> URLRequest? {
+        guard let baseURL = URL(string: Constants.baseAuthUrlString) else {
+            print("[OAuth2Service.makeOAuthTokenRequest]: URLGenerationError - Не удалось инициализировать URL")
+            return nil
+        }
+        guard var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
+            print("[OAuth2Service.makeOAuthTokenRequest]: NetworkError - Ошибка инициализации URLComponents")
+            return nil
+        }
         
         urlComponents.queryItems = [
             URLQueryItem(name: "client_id", value: Constants.accessKey),
