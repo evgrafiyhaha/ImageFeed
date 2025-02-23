@@ -18,18 +18,20 @@ extension URLSession {
         }
         
         let task = dataTask(with: request, completionHandler: { data, response, error in
+            let urlString = request.url?.absoluteString ?? "Unknown URL"
+            
             if let data = data, let response = response, let statusCode = (response as? HTTPURLResponse)?.statusCode {
                 if 200 ..< 300 ~= statusCode {
                     fulfillCompletionOnTheMainThread(.success(data))
                 } else {
-                    print("Ошибка HTTP: статус-код \(statusCode)")
+                    print("[URLSession.data]: NetworkError - код ошибки \(statusCode), URL: \(urlString)")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(statusCode)))
                 }
             } else if let error = error {
-                print("Ошибка запроса: \(error.localizedDescription)")
+                print("[URLSession.data]: NetworkError - ошибка запроса \(error.localizedDescription), URL: \(urlString)")
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlRequestError(error)))
             } else {
-                print("Неизвестная ошибка URLSession")
+                print("[URLSession.data]: NetworkError - неизвестная ошибка, URL: \(urlString)")
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError))
             }
         })
