@@ -5,6 +5,8 @@ final class ProfileViewController: UIViewController {
 
     // MARK: - Private Properties
 
+    private let profileLogoutService = ProfileLogoutService.shared
+
     private var profileImageServiceObserver: NSObjectProtocol?
 
     private var logoutButton: UIButton?
@@ -42,8 +44,30 @@ final class ProfileViewController: UIViewController {
 
     // MARK: - Private Methods
 
+    private func logout() {
+        profileImageService.removeAvatarURL()
+        profileLogoutService.logout()
+        guard let window = UIApplication.shared.windows.first else {
+            assertionFailure("Invalid window configuration")
+            return
+        }
+        window.rootViewController = SplashViewController()
+    }
+    
     @objc private func didTapLogoutButton(_ sender: Any) {
-        // TODO: - Добавить логику при нажатии на кнопку
+        let alert = UIAlertController(title: "Пока, пока!", message: "Вы уверены что хотите выйти?", preferredStyle: .alert)
+
+        let agreeAction = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
+            self?.logout()
+        }
+        let cancelAction = UIAlertAction(title: "Нет", style: .default,handler: nil)
+
+        alert.addAction(agreeAction)
+        alert.addAction(cancelAction)
+
+        alert.preferredAction = cancelAction
+
+        present(alert, animated: true, completion: nil)
     }
 
     private func initViews() {

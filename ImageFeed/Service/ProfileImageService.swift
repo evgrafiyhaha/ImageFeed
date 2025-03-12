@@ -21,7 +21,7 @@ final class ProfileImageService {
     private init() {}
     
     // MARK: - Public Methods
-    
+
     func fetchProfileImageURL(username: String, _ completion: @escaping (Result<String, Error>) -> Void){
         guard let token = tokenStorage.token else {
             print("[ProfileImageService.fetchProfileImageURL]: AuthError - отсутствует токен")
@@ -74,7 +74,11 @@ final class ProfileImageService {
         self.task = task
         task.resume()
     }
-    
+
+    func removeAvatarURL() {
+        avatarURL = nil
+    }
+
     // MARK: - Private Methods
     
     private func makeImageRequest(token: String,username: String) -> URLRequest? {

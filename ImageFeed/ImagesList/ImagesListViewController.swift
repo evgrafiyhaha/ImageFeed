@@ -5,10 +5,11 @@ final class ImagesListViewController: UIViewController {
     // MARK: - Private Properties
 
     private var tableView: UITableView?
+    private var imagesListService = ImagesListService()
+    private var imagesServiceObserver: NSObjectProtocol?
 
-    private let photosName: [String] = Array(0..<20).map{ "\($0)" }
-    private let currentDate = Date()
-    
+    private var photos: [Photo] = []
+
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .long
@@ -16,14 +17,25 @@ final class ImagesListViewController: UIViewController {
         formatter.locale = Locale(identifier: "ru_RU")
         return formatter
     }()
-    
+
     // MARK: - View Life Cycles
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         initView()
+
+        imagesServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ImagesListService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateTableViewAnimated()
+            }
+        imagesListService.fetchPhotosNextPage()
     }
-    
+
     // MARK: - Private Methods
 
     private func initView() {
@@ -49,48 +61,68 @@ final class ImagesListViewController: UIViewController {
     }
 
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        guard
-            let image = UIImage(named: photosName[indexPath.row])
-        else {
+        let photo = photos[indexPath.row]
+        cell.delegate = self
+        cell.configureCell(dateFormatter: dateFormatter, photo: photo)
+    }
+
+    private func updateTableViewAnimated() {
+        guard let tableView else {
             return
         }
-        let currentDateString = dateFormatter.string(from: currentDate)
-        let isLiked = indexPath.row % 2 == 0
+        let oldCount = photos.count
+        let newCount = imagesListService.photos.count
 
-        cell.configureCell(image: image,currentDate: currentDateString,isLiked: isLiked)
+        if oldCount != newCount {
+            photos = imagesListService.photos
+            tableView.performBatchUpdates {
+                let indexPaths = (oldCount..<newCount).map { i in
+                    IndexPath(row: i, section: 0)
+                }
+                tableView.insertRows(at: indexPaths, with: .automatic)
+            } completion: { _ in }
+        }
+    }
+
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        self.present(alert, animated: true)
     }
 }
 
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let singleImageViewController = SingleImageViewController()
-
-        let image = UIImage(named: photosName[indexPath.row])
-        singleImageViewController.image = image
+        let photo = photos[indexPath.row]
+        let singleImageViewController = SingleImageViewController(fullImageUrl: photo.largeImageURL)
         singleImageViewController.modalPresentationStyle = .fullScreen
 
         self.present(singleImageViewController, animated: true)
     }
-    
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        guard let image = UIImage(named: photosName[indexPath.row]) else {
-            return 0
-        }
+        let size = photos[indexPath.row].size
         let imageInsets = UIEdgeInsets(top: 4, left: 16, bottom: 4, right: 16)
         let imageViewWidth = tableView.bounds.width - imageInsets.left - imageInsets.right
-        let imageWidth = image.size.width
+        let imageWidth = size.width
         let scale = imageViewWidth / imageWidth
-        let cellHeight = image.size.height * scale + imageInsets.top + imageInsets.bottom
+        let cellHeight = size.height * scale + imageInsets.top + imageInsets.bottom
         return cellHeight
-        
+
+    }
+
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row+1 == imagesListService.photos.count {
+            imagesListService.fetchPhotosNextPage()
+        }
     }
 }
 
 extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return photosName.count
+        return photos.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let imageListCell = tableView.dequeueReusableCell(
             withIdentifier: ImagesListCell.reuseIdentifier,
@@ -98,8 +130,32 @@ extension ImagesListViewController: UITableViewDataSource {
         ) as? ImagesListCell else {
             return UITableViewCell()
         }
-        
+
         configCell(for: imageListCell, with: indexPath)
         return imageListCell
+    }
+}
+
+extension ImagesListViewController: ImagesListCellDelegate {
+    func imageListCellDidTapLike(_ cell: ImagesListCell) {
+        guard
+            let tableView,
+            let indexPath = tableView.indexPath(for: cell)
+        else { return }
+        let photo = photos[indexPath.row]
+
+        UIBlockingProgressHUD.show()
+        imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+                self.photos[indexPath.row] = self.imagesListService.photos[indexPath.row]
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+                UIBlockingProgressHUD.dismiss()
+            case .failure:
+                UIBlockingProgressHUD.dismiss()
+                showAlert(title: "Что-то пошло не так", message: "Не удалось поставить лайк")
+            }
+        }
     }
 }
