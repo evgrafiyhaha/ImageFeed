@@ -5,8 +5,19 @@ final class WebViewViewController: UIViewController {
 
     // MARK: - Private Properties
 
-    private var webView: WKWebView?
-    private var progressView: UIProgressView?
+    private lazy var webView: WKWebView = {
+        let webView = WKWebView()
+        webView.navigationDelegate = self
+        view.addSubview(webView)
+        return webView
+    }()
+    private lazy var progressView: UIProgressView = {
+        let progressView = UIProgressView()
+        progressView.progressTintColor = .ypBlack
+        progressView.progressViewStyle = .default
+        view.addSubview(progressView)
+        return progressView
+    }()
 
     private var progressObservation: NSKeyValueObservation?
 
@@ -23,7 +34,6 @@ final class WebViewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         initView()
-        webView?.navigationDelegate = self
         loadAuthView()
         observeProgress()
     }
@@ -33,20 +43,8 @@ final class WebViewViewController: UIViewController {
     private func initView() {
         self.view.backgroundColor = .systemBackground
 
-        self.progressView = UIProgressView()
-        self.webView = WKWebView()
-        guard
-            let webView,
-            let progressView
-        else { return }
-        progressView.progressTintColor = .ypBlack
-        progressView.progressViewStyle = .default
-
         webView.translatesAutoresizingMaskIntoConstraints = false
         progressView.translatesAutoresizingMaskIntoConstraints = false
-
-        self.view.addSubview(webView)
-        self.view.addSubview(progressView)
 
         NSLayoutConstraint.activate([
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -61,26 +59,17 @@ final class WebViewViewController: UIViewController {
     }
 
     private func observeProgress() {
-        guard let webView else { return }
         progressObservation = webView.observe(\.estimatedProgress, options: .new) { [weak self] _, change in
             self?.updateProgress()
         }
     }
 
     private func updateProgress() {
-        guard
-            let webView,
-            let progressView
-        else { return }
         progressView.progress = Float(webView.estimatedProgress)
         progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
     }
 
     private func loadAuthView() {
-        guard
-            let webView
-        else { return }
-
         guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else {
             print("[WebViewViewController.loadAuthView]: URLFormationError - Некорректный URL")
             return

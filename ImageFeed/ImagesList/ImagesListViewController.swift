@@ -4,7 +4,15 @@ final class ImagesListViewController: UIViewController {
 
     // MARK: - Private Properties
 
-    private var tableView: UITableView?
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
+        tableView.backgroundColor = .clear
+        view.addSubview(tableView)
+        return tableView
+    }()
     private var imagesListService = ImagesListService()
     private var imagesServiceObserver: NSObjectProtocol?
 
@@ -41,16 +49,8 @@ final class ImagesListViewController: UIViewController {
     private func initView() {
         self.view.backgroundColor = .ypBlack
 
-        self.tableView = UITableView()
-        guard let tableView else { return }
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
-        tableView.backgroundColor = .clear
-
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(ImagesListCell.self, forCellReuseIdentifier: ImagesListCell.reuseIdentifier)
-        self.view.addSubview(tableView)
 
         NSLayoutConstraint.activate([
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -67,9 +67,6 @@ final class ImagesListViewController: UIViewController {
     }
 
     private func updateTableViewAnimated() {
-        guard let tableView else {
-            return
-        }
         let oldCount = photos.count
         let newCount = imagesListService.photos.count
 
@@ -99,7 +96,7 @@ extension ImagesListViewController: UITableViewDelegate {
 
         self.present(singleImageViewController, animated: true)
     }
-
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let size = photos[indexPath.row].size
         let imageInsets = UIEdgeInsets(top: 4, left: 16, bottom: 4, right: 16)
@@ -139,7 +136,6 @@ extension ImagesListViewController: UITableViewDataSource {
 extension ImagesListViewController: ImagesListCellDelegate {
     func imageListCellDidTapLike(_ cell: ImagesListCell) {
         guard
-            let tableView,
             let indexPath = tableView.indexPath(for: cell)
         else { return }
         let photo = photos[indexPath.row]
