@@ -73,8 +73,10 @@ final class ImagesListCell: UITableViewCell {
         cellImage.kf.setImage(with: url,placeholder: UIImage(named: "PhotoStub"))
         if let createdAt = photo.createdAt {
             datelabel.text = dateFormatter.string(from: createdAt)
+        } else {
+            datelabel.text = ""
         }
-        
+
         let likeImage = photo.isLiked ? UIImage(named: "like_button_on")?.withRenderingMode(.alwaysOriginal) : UIImage(named: "like_button_off")?.withRenderingMode(.alwaysOriginal)
         likeButton.setImage(likeImage, for: .normal)
     }

@@ -11,6 +11,7 @@ final class ImagesListService {
 
     private(set) var photos: [Photo] = []
     private let tokenStorage = OAuth2TokenStorage()
+    private let dateFormatter = ISO8601DateFormatter()
 
     private var task: URLSessionTask?
     private var lastLoadedPage: Int = 0
@@ -38,7 +39,7 @@ final class ImagesListService {
 
                 switch result {
                 case .success(let data):
-                    let downloadedPhotos = data.map { Photo(from: $0)}
+                    let downloadedPhotos = data.map { Photo(from: $0,with: self.dateFormatter)}
 
                     self.photos.append(contentsOf: downloadedPhotos)
                     self.lastLoadedPage += 1
@@ -75,15 +76,7 @@ final class ImagesListService {
                 case .success:
                     if let index = self.photos.firstIndex(where: { $0.id == photoId }) {
                         let photo = self.photos[index]
-                        let newPhoto = Photo(
-                            id: photo.id,
-                            size: photo.size,
-                            createdAt: photo.createdAt,
-                            welcomeDescription: photo.welcomeDescription,
-                            thumbImageURL: photo.thumbImageURL,
-                            largeImageURL: photo.largeImageURL,
-                            isLiked: !photo.isLiked
-                        )
+                        let newPhoto = Photo(from: photo)
                         self.photos[index] = newPhoto
                     }
                     completion(.success(()))

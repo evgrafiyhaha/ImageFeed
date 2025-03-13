@@ -143,13 +143,12 @@ extension ImagesListViewController: ImagesListCellDelegate {
         UIBlockingProgressHUD.show()
         imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
             guard let self else { return }
+            UIBlockingProgressHUD.dismiss()
             switch result {
             case .success:
                 self.photos[indexPath.row] = self.imagesListService.photos[indexPath.row]
                 tableView.reloadRows(at: [indexPath], with: .automatic)
-                UIBlockingProgressHUD.dismiss()
             case .failure:
-                UIBlockingProgressHUD.dismiss()
                 showAlert(title: "Что-то пошло не так", message: "Не удалось поставить лайк")
             }
         }

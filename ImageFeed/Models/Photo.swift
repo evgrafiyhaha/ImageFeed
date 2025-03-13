@@ -11,9 +11,7 @@ struct Photo {
 }
 
 extension Photo {
-    init(from photoResult: PhotoResult) {
-        let dateFormatter = ISO8601DateFormatter()
-
+    init(from photoResult: PhotoResult,with dateFormatter: ISO8601DateFormatter) {
         self.id = photoResult.id
         self.size = CGSize(width: photoResult.width, height: photoResult.height)
         self.createdAt = dateFormatter.date(from: photoResult.createdAt)
@@ -21,5 +19,14 @@ extension Photo {
         self.thumbImageURL = photoResult.urls.thumb
         self.largeImageURL = photoResult.urls.full
         self.isLiked = photoResult.likedByUser
+    }
+    init (from photo: Photo) {
+        self.id = photo.id
+        self.size = photo.size
+        self.createdAt = photo.createdAt
+        self.welcomeDescription = photo.welcomeDescription
+        self.thumbImageURL = photo.thumbImageURL
+        self.largeImageURL = photo.largeImageURL
+        self.isLiked = !photo.isLiked
     }
 }
