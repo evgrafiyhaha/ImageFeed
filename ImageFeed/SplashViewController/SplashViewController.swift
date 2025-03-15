@@ -8,14 +8,18 @@ final class SplashViewController: UIViewController {
     private let profileService = ProfileService.shared
     private let showAuthenticationScreenSegueIdentifier = "showAuthenticationScreen"
 
-    private var image: UIImageView?
-
+    private lazy var image: UIImageView = {
+        let image = UIImageView(image: UIImage(named: "splash_screen_logo"))
+        self.view.addSubview(image)
+        return image
+    }()
+    
     // MARK: - View Life Cycles
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        initView()
+        setupConstraints()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -30,13 +34,9 @@ final class SplashViewController: UIViewController {
 
     // MARK: - Private Methods
 
-    private func initView() {
+    private func setupConstraints() {
         self.view.backgroundColor = .ypBlack
-
-        let image = UIImageView(image: UIImage(named: "splash_screen_logo"))
         image.translatesAutoresizingMaskIntoConstraints = false
-        self.image = image
-        self.view.addSubview(image)
 
         NSLayoutConstraint.activate([
             image.centerXAnchor.constraint(equalTo: view.centerXAnchor),

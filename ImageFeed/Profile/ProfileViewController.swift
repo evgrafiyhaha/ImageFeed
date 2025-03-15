@@ -5,13 +5,47 @@ final class ProfileViewController: UIViewController {
 
     // MARK: - Private Properties
 
+    private let profileLogoutService = ProfileLogoutService.shared
+
     private var profileImageServiceObserver: NSObjectProtocol?
 
-    private var logoutButton: UIButton?
-    private var descriptionLabel: UILabel?
-    private var userImage: UIImageView?
-    private var nameLabel: UILabel?
-    private var loginNameLabel: UILabel?
+    private lazy var logoutButton: UIButton = {
+        let buttonImage = UIImage(systemName: "ipad.and.arrow.forward") ?? UIImage()
+        let logoutButton = UIButton.systemButton(with: buttonImage, target: self, action: #selector(Self.didTapLogoutButton))
+        logoutButton.tintColor = .ypRed
+        view.addSubview(logoutButton)
+        return logoutButton
+    }()
+    private lazy var descriptionLabel: UILabel = {
+        let descriptionLabel = UILabel()
+        descriptionLabel.font = .systemFont(ofSize: 13)
+        descriptionLabel.textColor = .white
+        view.addSubview(descriptionLabel)
+        return descriptionLabel
+    }()
+    private lazy var userImage: UIImageView = {
+        let profileImage = UIImage(named: "Stub.jpeg")
+        let userImage = UIImageView(image: profileImage)
+        userImage.layer.cornerRadius = 35
+        userImage.clipsToBounds = true
+        view.addSubview(userImage)
+        return userImage
+    }()
+    private lazy var nameLabel: UILabel = {
+        let nameLabel = UILabel()
+        nameLabel.font = .systemFont(ofSize: 23)
+        nameLabel.textColor = .white
+        view.addSubview(nameLabel)
+        return nameLabel
+
+    }()
+    private lazy var loginNameLabel: UILabel = {
+        let loginNameLabel = UILabel()
+        loginNameLabel.font = .systemFont(ofSize: 13)
+        loginNameLabel.textColor = .ypGray
+        view.addSubview(loginNameLabel)
+        return loginNameLabel
+    }()
 
     private let profileService = ProfileService.shared
     private let profileImageService = ProfileImageService.shared
@@ -21,12 +55,8 @@ final class ProfileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .ypBlack
-
-        initViews()
-        addSubviews()
+        
         setupConstraints()
-        userImage?.layer.cornerRadius = 35
-        userImage?.clipsToBounds = true
         updateProfileDetails()
         profileImageServiceObserver = NotificationCenter.default
             .addObserver(
@@ -42,46 +72,33 @@ final class ProfileViewController: UIViewController {
 
     // MARK: - Private Methods
 
-    @objc private func didTapLogoutButton(_ sender: Any) {
-        // TODO: - Добавить логику при нажатии на кнопку
+    private func logout() {
+        profileImageService.removeAvatarURL()
+        profileLogoutService.logout()
+        guard let window = UIApplication.shared.windows.first else {
+            assertionFailure("Invalid window configuration")
+            return
+        }
+        window.rootViewController = SplashViewController()
     }
+    
+    @objc private func didTapLogoutButton(_ sender: Any) {
+        let alert = UIAlertController(title: "Пока, пока!", message: "Вы уверены что хотите выйти?", preferredStyle: .alert)
 
-    private func initViews() {
-        let descriptionLabel = UILabel()
-        descriptionLabel.font = .systemFont(ofSize: 13)
-        descriptionLabel.textColor = .white
+        let agreeAction = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
+            self?.logout()
+        }
+        let cancelAction = UIAlertAction(title: "Нет", style: .default,handler: nil)
 
-        let loginNameLabel = UILabel()
-        loginNameLabel.font = .systemFont(ofSize: 13)
-        loginNameLabel.textColor = .ypGray
+        alert.addAction(agreeAction)
+        alert.addAction(cancelAction)
 
-        let nameLabel = UILabel()
-        nameLabel.font = .systemFont(ofSize: 23)
-        nameLabel.textColor = .white
+        alert.preferredAction = cancelAction
 
-        let profileImage = UIImage(named: "Stub.jpeg")
-        let userImage = UIImageView(image: profileImage)
-        userImage.layer.cornerRadius = 35
-
-        let buttonImage = UIImage(systemName: "ipad.and.arrow.forward") ?? UIImage()
-        let logoutButton = UIButton.systemButton(with: buttonImage, target: self, action: #selector(Self.didTapLogoutButton))
-        logoutButton.tintColor = .ypRed
-
-        self.logoutButton = logoutButton
-        self.descriptionLabel = descriptionLabel
-        self.userImage = userImage
-        self.nameLabel = nameLabel
-        self.loginNameLabel = loginNameLabel
+        present(alert, animated: true, completion: nil)
     }
 
     private func setupConstraints() {
-        guard
-            let logoutButton,
-            let descriptionLabel,
-            let userImage,
-            let nameLabel,
-            let loginNameLabel
-        else { return }
 
         logoutButton.translatesAutoresizingMaskIntoConstraints = false
         userImage.translatesAutoresizingMaskIntoConstraints = false
@@ -107,29 +124,13 @@ final class ProfileViewController: UIViewController {
         ])
     }
 
-    private func addSubviews() {
-        guard
-            let logoutButton,
-            let descriptionLabel,
-            let userImage,
-            let nameLabel,
-            let loginNameLabel
-        else { return }
-
-        view.addSubview(logoutButton)
-        view.addSubview(descriptionLabel)
-        view.addSubview(userImage)
-        view.addSubview(nameLabel)
-        view.addSubview(loginNameLabel)
-    }
-
     private func updateProfileDetails() {
         let profile = profileService.profile
         guard let profile else { return }
 
-        self.descriptionLabel?.text = profile.bio
-        self.nameLabel?.text = profile.name
-        self.loginNameLabel?.text = profile.loginName
+        self.descriptionLabel.text = profile.bio
+        self.nameLabel.text = profile.name
+        self.loginNameLabel.text = profile.loginName
 
     }
 
@@ -139,8 +140,8 @@ final class ProfileViewController: UIViewController {
             let url = URL(string: profileImageURL)
         else { return }
 
-        userImage?.kf.indicatorType = .activity
-        userImage?.kf.setImage(with: url,placeholder: UIImage(named: "Stub.jpeg"))
+        userImage.kf.indicatorType = .activity
+        userImage.kf.setImage(with: url,placeholder: UIImage(named: "Stub.jpeg"))
     }
 
 }

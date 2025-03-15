@@ -1,5 +1,9 @@
 import UIKit
 
+protocol ImagesListCellDelegate: AnyObject {
+    func imageListCellDidTapLike(_ cell: ImagesListCell)
+}
+
 final class ImagesListCell: UITableViewCell {
     
     // MARK: - Static properties
@@ -8,18 +12,38 @@ final class ImagesListCell: UITableViewCell {
     
     // MARK: - Public Properties
     
-    private var cellImage: UIImageView?
-    private var likeButton: UIButton?
-    private var datelabel: UILabel?
+    weak var delegate: ImagesListCellDelegate?
+    
+    // MARK: - Private Properties
+    
+    private lazy var cellImage: UIImageView = {
+        let cellImage = UIImageView()
+        cellImage.layer.cornerRadius = 16
+        cellImage.layer.masksToBounds = true
+        contentView.addSubview(cellImage)
+        return cellImage
+    }()
+    private lazy var likeButton: UIButton = {
+        let buttonImage = UIImage(named: "like_button_off")?.withRenderingMode(.alwaysOriginal) ?? UIImage()
+        let likeButton = UIButton.systemButton(with: buttonImage, target: self, action: #selector(Self.didTapLikeButton))
+        contentView.addSubview(likeButton)
+        return likeButton
+    }()
+    private lazy var datelabel: UILabel = {
+        let datelabel = UILabel()
+        datelabel.textColor = .white
+        datelabel.font = .systemFont(ofSize: 13)
+        contentView.addSubview(datelabel)
+        return datelabel
+    }()
     private var gradientView = GradientView()
-
+    
     // MARK: - Initializers
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         
         initViews()
-        addSubviews()
         setupConstraints()
     }
     
@@ -27,8 +51,34 @@ final class ImagesListCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         initViews()
-        addSubviews()
         setupConstraints()
+    }
+    
+    // MARK: - Overrides Methods
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        cellImage.kf.cancelDownloadTask()
+    }
+    
+    // MARK: - Public Methods
+    
+    func configureCell(dateFormatter: DateFormatter,photo: Photo) {
+        guard
+            let url = URL(string: photo.thumbImageURL)
+        else { return }
+        
+        cellImage.kf.indicatorType = .activity
+        cellImage.kf.setImage(with: url,placeholder: UIImage(named: "PhotoStub"))
+        if let createdAt = photo.createdAt {
+            datelabel.text = dateFormatter.string(from: createdAt)
+        } else {
+            datelabel.text = ""
+        }
+
+        let likeImage = photo.isLiked ? UIImage(named: "like_button_on")?.withRenderingMode(.alwaysOriginal) : UIImage(named: "like_button_off")?.withRenderingMode(.alwaysOriginal)
+        likeButton.setImage(likeImage, for: .normal)
     }
     
     // MARK: - Private Methods
@@ -37,39 +87,10 @@ final class ImagesListCell: UITableViewCell {
         self.backgroundColor = .ypBlack
         self.contentMode = .center
         self.selectionStyle = .none
-        
-        
-        self.cellImage = UIImageView()
-        cellImage?.layer.cornerRadius = 16
-        cellImage?.layer.masksToBounds = true
-        
-        self.datelabel = UILabel()
-        datelabel?.textColor = .white
-        datelabel?.font = .systemFont(ofSize: 13)
-        
-        let buttonImage = UIImage(named: "like_button_off")?.withRenderingMode(.alwaysOriginal) ?? UIImage()
-        self.likeButton = UIButton.systemButton(with: buttonImage, target: self, action: #selector(Self.didTapLikeButton))
-    }
-    
-    private func addSubviews(){
-        guard
-            let cellImage,
-            let likeButton,
-            let datelabel
-        else { return }
-        
-        contentView.addSubview(cellImage)
-        contentView.addSubview(likeButton)
-        contentView.addSubview(datelabel)
         contentView.addSubview(gradientView)
     }
     
     private func setupConstraints() {
-        guard
-            let cellImage,
-            let likeButton,
-            let datelabel
-        else { return }
         
         cellImage.translatesAutoresizingMaskIntoConstraints = false
         likeButton.translatesAutoresizingMaskIntoConstraints = false
@@ -96,22 +117,8 @@ final class ImagesListCell: UITableViewCell {
             gradientView.heightAnchor.constraint(equalToConstant: 30)
         ])
     }
-
-    func configureCell(image : UIImage,currentDate: String,isLiked: Bool) {
-        guard
-            let cellImage,
-            let likeButton,
-            let datelabel
-        else { return }
-
-        cellImage.image = image
-        datelabel.text = currentDate
-
-        let likeImage = isLiked ? UIImage(named: "like_button_on")?.withRenderingMode(.alwaysOriginal) : UIImage(named: "like_button_off")?.withRenderingMode(.alwaysOriginal)
-        likeButton.setImage(likeImage, for: .normal)
-    }
-
+    
     @objc private func didTapLikeButton(_ sender: Any) {
-        // TODO: - Добавить логику при нажатии на кнопку
+        delegate?.imageListCellDidTapLike(self)
     }
 }
