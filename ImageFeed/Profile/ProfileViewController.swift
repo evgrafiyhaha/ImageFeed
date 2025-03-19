@@ -1,23 +1,31 @@
 import UIKit
 import Kingfisher
 
-final class ProfileViewController: UIViewController {
+public protocol ProfileViewControllerProtocol: AnyObject {
+    var presenter: ProfilePresenterProtocol? { get set }
+    func updateProfileDetails(name: String, login: String, bio: String?)
+    func updateAvatar(url: URL?)
+}
+
+final class ProfileViewController: UIViewController, ProfileViewControllerProtocol {
+
+    // MARK: - Public Properties
+
+    var presenter: ProfilePresenterProtocol?
 
     // MARK: - Private Properties
-
-    private let profileLogoutService = ProfileLogoutService.shared
-
-    private var profileImageServiceObserver: NSObjectProtocol?
 
     private lazy var logoutButton: UIButton = {
         let buttonImage = UIImage(systemName: "ipad.and.arrow.forward") ?? UIImage()
         let logoutButton = UIButton.systemButton(with: buttonImage, target: self, action: #selector(Self.didTapLogoutButton))
+        logoutButton.accessibilityIdentifier = "logoutButton"
         logoutButton.tintColor = .ypRed
         view.addSubview(logoutButton)
         return logoutButton
     }()
     private lazy var descriptionLabel: UILabel = {
         let descriptionLabel = UILabel()
+        descriptionLabel.accessibilityIdentifier = "descriptionLabel"
         descriptionLabel.font = .systemFont(ofSize: 13)
         descriptionLabel.textColor = .white
         view.addSubview(descriptionLabel)
@@ -26,6 +34,7 @@ final class ProfileViewController: UIViewController {
     private lazy var userImage: UIImageView = {
         let profileImage = UIImage(named: "Stub.jpeg")
         let userImage = UIImageView(image: profileImage)
+        userImage.accessibilityIdentifier = "userImage"
         userImage.layer.cornerRadius = 35
         userImage.clipsToBounds = true
         view.addSubview(userImage)
@@ -33,55 +42,65 @@ final class ProfileViewController: UIViewController {
     }()
     private lazy var nameLabel: UILabel = {
         let nameLabel = UILabel()
+        nameLabel.accessibilityIdentifier = "nameLabel"
         nameLabel.font = .systemFont(ofSize: 23)
         nameLabel.textColor = .white
         view.addSubview(nameLabel)
         return nameLabel
-
     }()
     private lazy var loginNameLabel: UILabel = {
         let loginNameLabel = UILabel()
+        loginNameLabel.accessibilityIdentifier = "loginNameLabel"
         loginNameLabel.font = .systemFont(ofSize: 13)
         loginNameLabel.textColor = .ypGray
         view.addSubview(loginNameLabel)
         return loginNameLabel
     }()
 
-    private let profileService = ProfileService.shared
-    private let profileImageService = ProfileImageService.shared
-
     // MARK: - View Life Cycles
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .ypBlack
-        
+
         setupConstraints()
-        updateProfileDetails()
-        profileImageServiceObserver = NotificationCenter.default
-            .addObserver(
-                forName: ProfileImageService.didChangeNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] _ in
-                guard let self = self else { return }
-                self.updateAvatar()
-            }
-        updateAvatar()
+        presenter?.viewDidLoad()
+    }
+
+    // MARK: - Public Methods
+
+    func updateProfileDetails(name: String, login: String, bio: String?) {
+        self.descriptionLabel.text = bio
+        self.nameLabel.text = name
+        self.loginNameLabel.text = login
+    }
+
+    func updateAvatar(url: URL?) {
+        userImage.kf.indicatorType = .activity
+        userImage.kf.setImage(with: url,placeholder: UIImage(named: "Stub.jpeg"))
+    }
+
+    func getDisplayedName() -> String? {
+        nameLabel.text
+    }
+    func getDisplayedLogin() -> String? {
+        loginNameLabel.text
+    }
+    func getDisplayedBio() -> String? {
+        descriptionLabel.text
     }
 
     // MARK: - Private Methods
 
     private func logout() {
-        profileImageService.removeAvatarURL()
-        profileLogoutService.logout()
+        presenter?.logout()
         guard let window = UIApplication.shared.windows.first else {
             assertionFailure("Invalid window configuration")
             return
         }
         window.rootViewController = SplashViewController()
     }
-    
+
     @objc private func didTapLogoutButton(_ sender: Any) {
         let alert = UIAlertController(title: "Пока, пока!", message: "Вы уверены что хотите выйти?", preferredStyle: .alert)
 
@@ -89,7 +108,7 @@ final class ProfileViewController: UIViewController {
             self?.logout()
         }
         let cancelAction = UIAlertAction(title: "Нет", style: .default,handler: nil)
-
+        
         alert.addAction(agreeAction)
         alert.addAction(cancelAction)
 
@@ -123,25 +142,4 @@ final class ProfileViewController: UIViewController {
             logoutButton.heightAnchor.constraint(equalToConstant: 24)
         ])
     }
-
-    private func updateProfileDetails() {
-        let profile = profileService.profile
-        guard let profile else { return }
-
-        self.descriptionLabel.text = profile.bio
-        self.nameLabel.text = profile.name
-        self.loginNameLabel.text = profile.loginName
-
-    }
-
-    private func updateAvatar() {
-        guard
-            let profileImageURL = ProfileImageService.shared.avatarURL,
-            let url = URL(string: profileImageURL)
-        else { return }
-
-        userImage.kf.indicatorType = .activity
-        userImage.kf.setImage(with: url,placeholder: UIImage(named: "Stub.jpeg"))
-    }
-
 }

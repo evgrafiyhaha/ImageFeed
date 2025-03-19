@@ -1,43 +1,85 @@
-//
-//  ImageFeedUITests.swift
-//  ImageFeedUITests
-//
-//  Created by Артемий Толкишевский on 26.12.2024.
-//
-
 import XCTest
 
-final class ImageFeedUITests: XCTestCase {
+class Image_FeedUITests: XCTestCase {
+    private let app = XCUIApplication()
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
 
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
+        app.launchArguments = ["testMode"]
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
 
-    @MainActor
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
-        }
+    func testAuth() throws {
+        app.buttons["Authenticate"].tap()
+
+        let webView = app.webViews["UnsplashWebView"]
+
+        XCTAssertTrue(webView.waitForExistence(timeout: 5))
+
+        let loginTextField = webView.descendants(matching: .textField).element
+        XCTAssertTrue(loginTextField.waitForExistence(timeout: 5))
+
+        let passwordTextField = webView.descendants(matching: .secureTextField).element
+        XCTAssertTrue(passwordTextField.waitForExistence(timeout: 5))
+
+        loginTextField.tap()
+        loginTextField.typeText("your login")
+        webView.swipeUp()
+
+        passwordTextField.tap()
+        passwordTextField.typeText("your password")
+        webView.swipeUp()
+
+        webView.buttons["Login"].tap()
+
+        let tablesQuery = app.tables
+        let cell = tablesQuery.children(matching: .cell).element(boundBy: 0)
+        XCTAssertTrue(cell.waitForExistence(timeout: 5))
+    }
+
+    func testFeed() throws {
+
+        let tablesQuery = app.tables
+        sleep(2)
+        app.swipeUp()
+        sleep(2)
+        app.swipeDown()
+        sleep(2)
+
+        let cell = tablesQuery.children(matching: .cell).element(boundBy: 0)
+        XCTAssertTrue(cell.waitForExistence(timeout: 5))
+        let likeButton = cell.buttons["likeButton"]
+        likeButton.tap()
+        sleep(3)
+
+        likeButton.tap()
+        sleep(3)
+
+        cell.tap()
+        sleep(3)
+        let image = app.scrollViews.images.element(boundBy: 0)
+        image.pinch(withScale: 3, velocity: 1)
+        image.pinch(withScale: 0.5, velocity: -1)
+
+        app.buttons["backButton"].tap()
+
+    }
+
+    func testProfile() throws {
+        sleep(3)
+        app.tabBars.buttons.element(boundBy: 1).tap()
+
+        sleep(1)
+        XCTAssertTrue(app.staticTexts["descriptionLabel"].exists)
+        XCTAssertTrue(app.staticTexts["nameLabel"].exists)
+        XCTAssertTrue(app.staticTexts["loginNameLabel"].exists)
+
+        app.buttons["logoutButton"].tap()
+        sleep(2)
+        app.alerts["Пока, пока!"].scrollViews.otherElements.buttons["Да"].tap()
+        sleep(2)
+
+        XCTAssertTrue(app.buttons["Authenticate"].exists)
     }
 }

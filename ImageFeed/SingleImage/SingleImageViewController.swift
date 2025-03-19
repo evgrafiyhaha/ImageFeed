@@ -10,6 +10,7 @@ final class SingleImageViewController: UIViewController {
     private lazy var backButton: UIButton = {
         let backButtonImage = UIImage(named: "nav_back_button_white")?.withRenderingMode(.alwaysOriginal) ?? UIImage()
         let backButton = UIButton.systemButton(with: backButtonImage, target: self, action: #selector(Self.didTapBackButton))
+        backButton.accessibilityIdentifier = "backButton"
         view.insertSubview(backButton, aboveSubview: scrollView)
         return backButton
     }()

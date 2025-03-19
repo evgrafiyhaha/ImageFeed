@@ -16,6 +16,7 @@ final class AuthViewController: UIViewController {
     private let oauth2Service = OAuth2Service.shared
     private lazy var loginButton: UIButton = {
         let loginButton = UIButton(type: .system)
+        loginButton.accessibilityIdentifier = "Authenticate"
         loginButton.setTitle("Войти", for: .normal)
         loginButton.backgroundColor = .white
         loginButton.setTitleColor(.ypBlack, for: .normal)
@@ -61,7 +62,11 @@ final class AuthViewController: UIViewController {
     
     @objc private func didTapLoginButton(_ sender: Any) {
         let webViewViewController = WebViewViewController()
-        
+
+        let authHelper = AuthHelper()
+        let webViewPresenter = WebViewPresenter(authHelper: authHelper)
+        webViewViewController.presenter = webViewPresenter
+        webViewPresenter.view = webViewViewController
         webViewViewController.delegate = self
         webViewViewController.modalPresentationStyle = .fullScreen
         
