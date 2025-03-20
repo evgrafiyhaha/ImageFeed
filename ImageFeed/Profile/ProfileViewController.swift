@@ -18,14 +18,14 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
     private lazy var logoutButton: UIButton = {
         let buttonImage = UIImage(systemName: "ipad.and.arrow.forward") ?? UIImage()
         let logoutButton = UIButton.systemButton(with: buttonImage, target: self, action: #selector(Self.didTapLogoutButton))
-        logoutButton.accessibilityIdentifier = "logoutButton"
+        logoutButton.accessibilityIdentifier = AccessibilityIdentifiers.profileLogoutButton
         logoutButton.tintColor = .ypRed
         view.addSubview(logoutButton)
         return logoutButton
     }()
     private lazy var descriptionLabel: UILabel = {
         let descriptionLabel = UILabel()
-        descriptionLabel.accessibilityIdentifier = "descriptionLabel"
+        descriptionLabel.accessibilityIdentifier = AccessibilityIdentifiers.profileDescriptionLabel
         descriptionLabel.font = .systemFont(ofSize: 13)
         descriptionLabel.textColor = .white
         view.addSubview(descriptionLabel)
@@ -34,7 +34,7 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
     private lazy var userImage: UIImageView = {
         let profileImage = UIImage(named: "Stub.jpeg")
         let userImage = UIImageView(image: profileImage)
-        userImage.accessibilityIdentifier = "userImage"
+        userImage.accessibilityIdentifier = AccessibilityIdentifiers.profileUserImage
         userImage.layer.cornerRadius = 35
         userImage.clipsToBounds = true
         view.addSubview(userImage)
@@ -42,7 +42,7 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
     }()
     private lazy var nameLabel: UILabel = {
         let nameLabel = UILabel()
-        nameLabel.accessibilityIdentifier = "nameLabel"
+        nameLabel.accessibilityIdentifier = AccessibilityIdentifiers.profileNameLabel
         nameLabel.font = .systemFont(ofSize: 23)
         nameLabel.textColor = .white
         view.addSubview(nameLabel)
@@ -50,7 +50,7 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
     }()
     private lazy var loginNameLabel: UILabel = {
         let loginNameLabel = UILabel()
-        loginNameLabel.accessibilityIdentifier = "loginNameLabel"
+        loginNameLabel.accessibilityIdentifier = AccessibilityIdentifiers.profileLoginNameLabel
         loginNameLabel.font = .systemFont(ofSize: 13)
         loginNameLabel.textColor = .ypGray
         view.addSubview(loginNameLabel)

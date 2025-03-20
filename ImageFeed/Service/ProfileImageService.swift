@@ -1,6 +1,5 @@
 import Foundation
 
-
 final class ProfileImageService {
     
     // MARK: - Static Properties

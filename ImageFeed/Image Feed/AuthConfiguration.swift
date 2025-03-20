@@ -38,14 +38,14 @@ struct AuthConfiguration {
     }
 
     static var standard: AuthConfiguration {
-        return AuthConfiguration(accessKey: Constants.accessKey,
-                                 secretKey: Constants.secretKey,
-                                 redirectURI: Constants.redirectURI,
-                                 accessScope: Constants.accessScope,
-                                 authURLString: Constants.unsplashAuthorizeURLString,
-                                 authBaseURL: Constants.baseAuthUrlString,
-                                 usersURLString: Constants.baseUsersUrlString,
-                                 profileURLString: Constants.baseUsersUrlString,
-                                 photosListURLString: Constants.basePhotosListString)
+        AuthConfiguration(accessKey: Constants.accessKey,
+                          secretKey: Constants.secretKey,
+                          redirectURI: Constants.redirectURI,
+                          accessScope: Constants.accessScope,
+                          authURLString: Constants.unsplashAuthorizeURLString,
+                          authBaseURL: Constants.baseAuthUrlString,
+                          usersURLString: Constants.baseUsersUrlString,
+                          profileURLString: Constants.baseUsersUrlString,
+                          photosListURLString: Constants.basePhotosListString)
     }
 }

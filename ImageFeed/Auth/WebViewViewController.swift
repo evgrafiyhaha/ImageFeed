@@ -19,7 +19,7 @@ final class WebViewViewController: UIViewController & WebViewViewControllerProto
 
     private lazy var webView: WKWebView = {
         let webView = WKWebView()
-        webView.accessibilityIdentifier = "UnsplashWebView"
+        webView.accessibilityIdentifier = AccessibilityIdentifiers.webViewWebView
         webView.navigationDelegate = self
         view.addSubview(webView)
         return webView
@@ -101,7 +101,7 @@ extension WebViewViewController: WKNavigationDelegate{
 
     private func code(from navigationAction: WKNavigationAction) -> String? {
         if let url = navigationAction.request.url {
-            return presenter?.code(from: url)
+            return presenter?.getCode(from: url)
         }
         return nil
     }

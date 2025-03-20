@@ -1,19 +1,12 @@
 import XCTest
+@testable import ImageFeed
 
-class Image_FeedUITests: XCTestCase {
-    private let app = XCUIApplication()
-
-    override func setUpWithError() throws {
-        continueAfterFailure = false
-
-        app.launchArguments = ["testMode"]
-        app.launch()
-    }
+final class Image_FeedUITests: UITestCase {
 
     func testAuth() throws {
-        app.buttons["Authenticate"].tap()
+        app.buttons[AccessibilityIdentifiers.authLoginButton].tap()
 
-        let webView = app.webViews["UnsplashWebView"]
+        let webView = app.webViews[AccessibilityIdentifiers.webViewWebView]
 
         XCTAssertTrue(webView.waitForExistence(timeout: 5))
 
@@ -24,11 +17,11 @@ class Image_FeedUITests: XCTestCase {
         XCTAssertTrue(passwordTextField.waitForExistence(timeout: 5))
 
         loginTextField.tap()
-        loginTextField.typeText("your login")
+        loginTextField.typeText("artemiytolkishevsky@yandex.ru")
         webView.swipeUp()
 
         passwordTextField.tap()
-        passwordTextField.typeText("your password")
+        passwordTextField.typeText("12345678")
         webView.swipeUp()
 
         webView.buttons["Login"].tap()
@@ -49,7 +42,7 @@ class Image_FeedUITests: XCTestCase {
 
         let cell = tablesQuery.children(matching: .cell).element(boundBy: 0)
         XCTAssertTrue(cell.waitForExistence(timeout: 5))
-        let likeButton = cell.buttons["likeButton"]
+        let likeButton = cell.buttons[AccessibilityIdentifiers.imagesListCellLikeButton]
         likeButton.tap()
         sleep(3)
 
@@ -62,7 +55,7 @@ class Image_FeedUITests: XCTestCase {
         image.pinch(withScale: 3, velocity: 1)
         image.pinch(withScale: 0.5, velocity: -1)
 
-        app.buttons["backButton"].tap()
+        app.buttons[AccessibilityIdentifiers.singleImageBackButton].tap()
 
     }
 
@@ -71,15 +64,15 @@ class Image_FeedUITests: XCTestCase {
         app.tabBars.buttons.element(boundBy: 1).tap()
 
         sleep(1)
-        XCTAssertTrue(app.staticTexts["descriptionLabel"].exists)
-        XCTAssertTrue(app.staticTexts["nameLabel"].exists)
-        XCTAssertTrue(app.staticTexts["loginNameLabel"].exists)
+        XCTAssertTrue(app.staticTexts[AccessibilityIdentifiers.profileDescriptionLabel].exists)
+        XCTAssertTrue(app.staticTexts[AccessibilityIdentifiers.profileNameLabel].exists)
+        XCTAssertTrue(app.staticTexts[AccessibilityIdentifiers.profileLoginNameLabel].exists)
 
-        app.buttons["logoutButton"].tap()
+        app.buttons[AccessibilityIdentifiers.profileLogoutButton].tap()
         sleep(2)
         app.alerts["Пока, пока!"].scrollViews.otherElements.buttons["Да"].tap()
         sleep(2)
 
-        XCTAssertTrue(app.buttons["Authenticate"].exists)
+        XCTAssertTrue(app.buttons[AccessibilityIdentifiers.authLoginButton].exists)
     }
 }

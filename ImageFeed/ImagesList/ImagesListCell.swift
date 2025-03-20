@@ -26,7 +26,7 @@ final class ImagesListCell: UITableViewCell {
     private lazy var likeButton: UIButton = {
         let buttonImage = UIImage(named: "like_button_off")?.withRenderingMode(.alwaysOriginal) ?? UIImage()
         let likeButton = UIButton.systemButton(with: buttonImage, target: self, action: #selector(Self.didTapLikeButton))
-        likeButton.accessibilityIdentifier = "likeButton"
+        likeButton.accessibilityIdentifier = AccessibilityIdentifiers.imagesListCellLikeButton
         contentView.addSubview(likeButton)
         return likeButton
     }()

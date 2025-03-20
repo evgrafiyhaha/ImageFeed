@@ -16,7 +16,7 @@ final class AuthViewController: UIViewController {
     private let oauth2Service = OAuth2Service.shared
     private lazy var loginButton: UIButton = {
         let loginButton = UIButton(type: .system)
-        loginButton.accessibilityIdentifier = "Authenticate"
+        loginButton.accessibilityIdentifier = AccessibilityIdentifiers.authLoginButton
         loginButton.setTitle("Войти", for: .normal)
         loginButton.backgroundColor = .white
         loginButton.setTitleColor(.ypBlack, for: .normal)
